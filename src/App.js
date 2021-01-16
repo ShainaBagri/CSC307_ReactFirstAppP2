@@ -8,14 +8,31 @@ class App extends Component {
         characters: []
     }
 
+    makeDeleteCall(user) {
+        return axios.delete('http://localhost:5000/users', {data: user})
+            .then(function (response) {
+                console.log(response);
+                //return (response.status === 200);
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+                return false;
+            });
+    }
+
     removeCharacter = index => {
         const { characters } = this.state
-
-        this.setState({
-            characters: characters.filter((character, i) => {
-                return i !== index
-            })
-        })
+        let user = characters[index]
+        this.makeDeleteCall(user).then(callResult => {
+            if(callResult.status === 200) {
+                this.setState({ 
+                    characters: characters.filter((character, i) => {
+                        return i !== index
+                    })
+                });
+            }
+        });
     }
 
     makePostCall(character){
@@ -34,7 +51,7 @@ class App extends Component {
     handleSubmit = character => {
         this.makePostCall(character).then(callResult => {
             if(callResult.status === 201) {
-                this.setState({ characters: [...this.state.characters, character] });
+                this.setState({ characters: [...this.state.characters, callResult.data] });
             }
         });
     }
@@ -49,7 +66,7 @@ class App extends Component {
                 // Not handling the error. Just logging into the console.
                 console.log(error)
             });
-        }
+    }
 
     render() {
         const { characters } = this.state
